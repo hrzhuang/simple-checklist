@@ -239,7 +239,11 @@ viewEmptyState =
         , Html.Attributes.class "justify-content-center align-items-center"
         ]
         [ FontAwesome.Icon.viewStyled
-            [ Svg.Attributes.class "w-25 h-25 text-muted"
+            [ Html.Attributes.id "empty-state-graphic"
+
+            -- This is used because using Html.Attributes.class would clear all
+            -- classes set by FontAwesome
+            , Svg.Attributes.class "text-muted"
             ]
             FontAwesome.Solid.clipboardCheck
         , Html.h2
