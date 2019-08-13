@@ -156,7 +156,11 @@ update msg model =
                     , after =
                         case model.tasks.edit of
                             Just edit ->
-                                if String.isEmpty edit.text then
+                                if
+                                    edit.text
+                                        |> String.trim
+                                        |> String.isEmpty
+                                then
                                     model.tasks.after
 
                                 else
