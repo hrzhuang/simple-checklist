@@ -284,7 +284,7 @@ viewTask task =
                     ]
                     [ FontAwesome.Icon.viewIcon FontAwesome.Solid.check ]
                 , Html.div
-                    [ Html.Attributes.class "ml-3 w-100 h-100 min-height-100"
+                    [ Html.Attributes.class "ml-3 w-100 min-height-100"
                     , Html.Attributes.class "cursor-pointer"
                     , Html.Events.onClick (StartEdit task.id)
                     ]
