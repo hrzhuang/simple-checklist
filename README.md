@@ -7,5 +7,6 @@ A simple checklist progressive web app written in Elm.
 ## Features
 
 * Add, remove, edit tasks
+* Persistent local storage using IndexedDB
 * Native app behaviour when installed to mobile home screen
 * Works offline
