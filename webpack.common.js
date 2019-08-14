@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
   module: {
@@ -44,5 +45,6 @@ module.exports = {
         },
       ],
     }),
+    new WorkboxPlugin.GenerateSW(),
   ],
 };
