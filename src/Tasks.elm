@@ -1,5 +1,6 @@
-module Tasks exposing (Task, Tasks, concat)
+port module Tasks exposing (Task, Tasks, concat, save)
 
+import Json.Encode
 import Maybe.Extra
 
 
@@ -28,3 +29,14 @@ concat tasks =
         , Maybe.Extra.toList tasks.edit
         , tasks.after
         ]
+
+
+save : Tasks -> Cmd msg
+save tasks =
+    tasks
+        |> concat
+        |> Json.Encode.list (\task -> Json.Encode.string task.text)
+        |> saveTasks
+
+
+port saveTasks : Json.Encode.Value -> Cmd msg

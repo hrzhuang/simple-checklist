@@ -8,6 +8,7 @@ import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Html.Keyed
+import Json.Decode
 import List.Extra
 import Maybe.Extra
 import Svg.Attributes
@@ -15,7 +16,7 @@ import Task
 import Tasks exposing (Task, Tasks)
 
 
-main : Program () Model Msg
+main : Program Json.Decode.Value Model Msg
 main =
     Browser.element
         { init = init
@@ -35,20 +36,30 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
-    let
-        initialTaskId =
-            0
-    in
-    ( { tasks =
-            { before = []
-            , edit = Just { id = initialTaskId, text = "" }
-            , after = []
+init : Json.Decode.Value -> ( Model, Cmd Msg )
+init flags =
+    ( case
+        Json.Decode.decodeValue (Json.Decode.list Json.Decode.string) flags
+      of
+        Ok tasks ->
+            { tasks =
+                { before = []
+                , edit = Nothing
+                , after =
+                    List.indexedMap (\id text -> { id = id, text = text }) tasks
+                }
+            , nextTaskId = List.length tasks
             }
-      , nextTaskId = initialTaskId + 1
-      }
-    , focusEdit
+
+        Err _ ->
+            { tasks =
+                { before = []
+                , edit = Nothing
+                , after = []
+                }
+            , nextTaskId = 0
+            }
+    , Cmd.none
     )
 
 
@@ -84,18 +95,20 @@ update msg model =
             )
 
         RemoveTask id ->
-            ( { model
-                | tasks =
-                    { before = []
-                    , edit = Nothing
-                    , after =
-                        model.tasks
-                            |> Tasks.concat
-                            |> List.filter (\task -> task.id /= id)
+            let
+                newModel =
+                    { model
+                        | tasks =
+                            { before = []
+                            , edit = Nothing
+                            , after =
+                                model.tasks
+                                    |> Tasks.concat
+                                    |> List.filter (\task -> task.id /= id)
+                            }
                     }
-              }
-            , Cmd.none
-            )
+            in
+            ( newModel, Tasks.save newModel.tasks )
 
         StartEdit id ->
             ( { model
@@ -149,29 +162,31 @@ update msg model =
             )
 
         FinishEdit ->
-            ( { model
-                | tasks =
-                    { before = model.tasks.before
-                    , edit = Nothing
-                    , after =
-                        case model.tasks.edit of
-                            Just edit ->
-                                if
-                                    edit.text
-                                        |> String.trim
-                                        |> String.isEmpty
-                                then
-                                    model.tasks.after
+            let
+                newModel =
+                    { model
+                        | tasks =
+                            { before = model.tasks.before
+                            , edit = Nothing
+                            , after =
+                                case model.tasks.edit of
+                                    Just edit ->
+                                        if
+                                            edit.text
+                                                |> String.trim
+                                                |> String.isEmpty
+                                        then
+                                            model.tasks.after
 
-                                else
-                                    edit :: model.tasks.after
+                                        else
+                                            edit :: model.tasks.after
 
-                            Nothing ->
-                                model.tasks.after
+                                    Nothing ->
+                                        model.tasks.after
+                            }
                     }
-              }
-            , Cmd.none
-            )
+            in
+            ( newModel, Tasks.save newModel.tasks )
 
         NoOp ->
             ( model, Cmd.none )
